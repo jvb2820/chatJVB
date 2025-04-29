@@ -27,6 +27,7 @@ The application serves as an interactive assistant, providing structured and int
 Jeuz Vinci Bas
 🔹 Skills: Python, Streamlit, AI Integration, LangChain, NLP
 🔹 GitHub: [jvb2820](https://github.com/jvb2820)
+🔹 LinkedIn: https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/
 
 ## 📜 License
 This project is for educational and internal use only.
