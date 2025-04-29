@@ -56,7 +56,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # App header
-st.header("ChatJVB")
+st.header("🚀 ChatJVB")
 
 # Initialize session state for storing conversation history
 if "conversation_history" not in st.session_state:
