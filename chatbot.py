@@ -15,6 +15,16 @@ COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 BOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")
 USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")
 
+# Load bot logo once at the beginning of the app
+if "bot_logo_base64" not in st.session_state:
+    try:
+        with open(BOT_LOGO_PATH, "rb") as f:
+            bot_logo_bytes = f.read()
+            st.session_state.bot_logo_base64 = base64.b64encode(bot_logo_bytes).decode()
+    except Exception as e:
+        st.sidebar.warning(f"Could not load bot logo: {e}")
+        st.session_state.bot_logo_base64 = ""  # Set fallback empty logo if there's an error
+
 st.markdown("""
 <style>
     .user-message {
