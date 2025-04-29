@@ -1,83 +1,38 @@
-chatJVB
-AI Chatbot with PDF Content-based Question Answering
+# 📌 ChatJVB
 
-📌 Project Overview
-chatJVB is a chatbot application that enables users to interact with an AI assistant. The app supports general conversation as well as content-based questions about uploaded PDF documents. The AI processes the PDF, extracts its text, and provides answers based on the document. Users can also engage with the bot for general queries, providing an intuitive AI interaction experience.
+## 🌐 Overview
+ChatJVB is a powerful Streamlit-based chatbot application designed to provide intuitive document Q&A capabilities alongside general conversational abilities. This project features a modern interface with PDF processing functionality to enable context-aware responses while maintaining an engaging user experience.
 
-🛠 Technologies Used
-Programming Language: Python
+The application serves as an interactive assistant, providing structured and intelligent responses to help users extract information from documents or engage in general conversation in a clean, intuitive, and professional manner.
 
-Libraries & Frameworks:
+## ✨ Features
+✔️ Document Q&A – Upload PDFs and ask questions about their content.
+✔️ General Chat – Engage in conversation without document context.
+✔️ Modern UI – Sleek and professional design with custom styling.
+✔️ Chat History – Maintains conversation flow with clear user/bot distinction.
+✔️ Lightweight & Fast – Built for efficiency with optimized text processing.
 
-Streamlit
+## 🛠️ Technologies Used
+🖥️ Frontend: Streamlit, Custom CSS
+🗄️ Backend: Python, LangChain
+⚡ Frameworks & Tools: PyPDF2, FAISS Vector Store, Cohere AI, LangChain
 
-PyPDF2
+## 🧠 AI Integration
+- Cohere Embeddings for document vectorization
+- Cohere Command model for intelligent responses
+- LangChain for document processing pipeline
+- FAISS for efficient vector similarity search
 
-Langchain
-
-Cohere API
-
-FAISS (Vector Store for embeddings)
-
-HTML (for custom styling)
-
-🔧 Features
-PDF Question Answering: Upload a PDF to extract text and ask questions related to the content.
-
-General Chat: Converse with the AI assistant on various topics.
-
-Session History: Keep track of the entire conversation within a session.
-
-Clear Chat: Clear chat history with the click of a button.
-
-Interactive UI: Built with Streamlit, offering an easy-to-use interface.
-
-📂 Project Structure
-bash
-Copy
-📂 chatJVB
- ┣ 📜 app.py  # Main application script
- ┣ 📜 logo.png  # App logo
- ┣ 📜 requirements.txt  # Project dependencies
- ┣ 📜 README.md  # Project documentation
-🚀 How to Run the Project
-Clone the Repository:
-
-bash
-Copy
-git clone https://github.com/your-repo-link.git
-Navigate to the Project Directory:
-
-bash
-Copy
-cd chatJVB
-Install Dependencies:
-
-bash
-Copy
-pip install -r requirements.txt
-Run the Application:
-
-bash
-Copy
-streamlit run app.py
-💻 Requirements
-Python 3.x
-
-Streamlit
-
-PyPDF2
-
-Langchain
-
-Cohere API Key (obtain from Cohere)
-
-👨‍💻 Author
+## 👨‍💻 Author
 Jeuz Vinci Bas
+🔹 Skills: Python, Streamlit, AI Integration, LangChain, NLP
+🔹 GitHub: [jvb2820](https://github.com/jvb2820)
 
-📧 Email: jeuzvinci7913@gmail.com
+## 📜 License
+This project is for educational and internal use only.
 
-💻 LinkedIn: Jeuz Vinci Bas
-
-Feel free to contribute, report issues, or improve this project! 🚀
-
+## 🚀 Getting Started
+1. Clone the repository
+2. Install required dependencies: `pip install -r requirements.txt`
+3. Set up your Cohere API key
+4. Run the application: `streamlit run app.py`
