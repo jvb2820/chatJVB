@@ -49,11 +49,25 @@ st.markdown("""
     .message-content {
         flex-grow: 1;
     }
+    .header-logo {
+        display: flex;
+        align-items: center;
+    }
+    .header-logo img {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # App header
-st.header("ChatJVB")
+st.markdown(f"""
+<div class="header-logo">
+    <img src="data:image/jpg;base64,{st.session_state.get('bot_logo_base64', '')}" alt="Logo">
+    <h1>ChatJVB</h1>
+</div>
+""", unsafe_allow_html=True)
 
 # Initialize session state for storing conversation history
 if "conversation_history" not in st.session_state:
