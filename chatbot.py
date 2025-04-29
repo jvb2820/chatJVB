@@ -11,13 +11,9 @@ import base64
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 
-# Set a more portable logo path (adjust as needed)
-# Option 1: Look for logo in the same directory as the script
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
-# Option 2: Look for logo in a "assets" subfolder
-# LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
 
-# Custom CSS for styling the chat messages
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
+
 st.markdown("""
 <style>
     .user-message {
@@ -68,7 +64,7 @@ with st.sidebar:
     st.title("Your Documents")
     file = st.file_uploader("Upload a PDF file to ask questions about it", type="pdf")
     
-    # Add clear chat button in sidebar
+    
     if st.button("Clear Chat History"):
         st.session_state.conversation_history = []
         st.rerun()
