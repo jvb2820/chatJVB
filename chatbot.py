@@ -19,7 +19,7 @@ USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")  # Use
 st.markdown("""
 <style>
     .user-message {
-        background-color: #006400;
+        background-color: #696969;
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
@@ -168,7 +168,7 @@ with chat_container:
                     <div class="logo-container">
                         <img src="data:image/svg+xml;base64,{st.session_state.get('user_logo_base64', '')}" class="logo-image" alt="User Logo">
                     </div>
-                    <strong style="font-size: 15px;">You:</strong> {message['content']}
+                     {message['content']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
