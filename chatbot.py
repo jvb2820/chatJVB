@@ -6,12 +6,16 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain_cohere import ChatCohere
 import os
+import base64
 
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 
-# Logo path
-LOGO_PATH = os.path.join(r"C:\Users\jeuzv\Desktop\Lifewood\Chatbot", "logo.png")
+# Set a more portable logo path (adjust as needed)
+# Option 1: Look for logo in the same directory as the script
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
+# Option 2: Look for logo in a "assets" subfolder
+# LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
 
 # Custom CSS for styling the chat messages
 st.markdown("""
@@ -138,6 +142,17 @@ if submit_button and user_question:
     # Force a rerun to update the display immediately and clear the input
     st.rerun()
 
+# Load the logo image (only once with better error handling)
+if "logo_base64" not in st.session_state:
+    try:
+        with open(LOGO_PATH, "rb") as f:
+            logo_bytes = f.read()
+            st.session_state.logo_base64 = base64.b64encode(logo_bytes).decode()
+    except Exception as e:
+        st.sidebar.warning(f"Could not load logo: {e}")
+        # Set a fallback empty string for the logo
+        st.session_state.logo_base64 = ""
+
 # Display conversation history with custom styling
 with chat_container:
     for message in st.session_state.conversation_history:
@@ -163,14 +178,3 @@ with chat_container:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-
-# Load the logo image (only once)
-if "logo_base64" not in st.session_state:
-    import base64
-    try:
-        with open(LOGO_PATH, "rb") as f:
-            logo_bytes = f.read()
-            st.session_state.logo_base64 = base64.b64encode(logo_bytes).decode()
-    except Exception as e:
-        st.sidebar.error(f"Error loading logo: {e}")
-        st.session_state.logo_base64 = ""
