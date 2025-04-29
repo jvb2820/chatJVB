@@ -23,6 +23,9 @@ st.markdown("""
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
+        display: flex;
+        align-items: flex-start;
+
     }
     .bot-message {
         background-color: #0000FF;
