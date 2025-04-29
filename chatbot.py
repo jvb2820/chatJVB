@@ -11,10 +11,11 @@ import base64
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 
-# Logo paths
-BOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")
-USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")
+# Set logo paths (adjust as needed)
+CHATBOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")  # Chatbot logo
+USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")  # User logo
 
+# Custom CSS for styling the chat messages
 st.markdown("""
 <style>
     .user-message {
@@ -22,8 +23,6 @@ st.markdown("""
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
-        display: flex;
-        align-items: flex-start;
     }
     .bot-message {
         background-color: #0000FF;
@@ -67,7 +66,7 @@ with st.sidebar:
     st.title("Your Documents")
     file = st.file_uploader("Upload a PDF file to ask questions about it", type="pdf")
     
-    
+    # Add clear chat button in sidebar
     if st.button("Clear Chat History"):
         st.session_state.conversation_history = []
         st.rerun()
@@ -141,25 +140,22 @@ if submit_button and user_question:
     # Force a rerun to update the display immediately and clear the input
     st.rerun()
 
-# Load both logo images (only once with better error handling)
-if "bot_logo_base64" not in st.session_state:
+# Load the logos (only once with better error handling)
+if "chatbot_logo_base64" not in st.session_state or "user_logo_base64" not in st.session_state:
     try:
-        with open(BOT_LOGO_PATH, "rb") as f:
-            bot_logo_bytes = f.read()
-            st.session_state.bot_logo_base64 = base64.b64encode(bot_logo_bytes).decode()
-    except Exception as e:
-        st.sidebar.warning(f"Could not load bot logo: {e}")
-        # Set a fallback empty string for the logo
-        st.session_state.bot_logo_base64 = ""
+        # Load chatbot logo
+        with open(CHATBOT_LOGO_PATH, "rb") as f:
+            chatbot_logo_bytes = f.read()
+            st.session_state.chatbot_logo_base64 = base64.b64encode(chatbot_logo_bytes).decode()
 
-if "user_logo_base64" not in st.session_state:
-    try:
+        # Load user logo
         with open(USER_LOGO_PATH, "rb") as f:
             user_logo_bytes = f.read()
             st.session_state.user_logo_base64 = base64.b64encode(user_logo_bytes).decode()
     except Exception as e:
-        st.sidebar.warning(f"Could not load user logo: {e}")
-        # Set a fallback empty string for the logo
+        st.sidebar.warning(f"Could not load logos: {e}")
+        # Set fallback empty strings for the logos
+        st.session_state.chatbot_logo_base64 = ""
         st.session_state.user_logo_base64 = ""
 
 # Display conversation history with custom styling
@@ -170,21 +166,19 @@ with chat_container:
             <div class="message-container">
                 <div class="user-message">
                     <div class="logo-container">
-                        <img src="data:image/svg+xml;base64,{st.session_state.get('user_logo_base64', '')}" class="logo-image" alt="User">
+                        <img src="data:image/svg+xml;base64,{st.session_state.get('user_logo_base64', '')}" class="logo-image" alt="User Logo">
                     </div>
-                    <div class="message-content">
-                        <strong style="font-size: 15px;">You:</strong> {message['content']}
-                    </div>
+                    <strong style="font-size: 15px;">You:</strong> {message['content']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
         else:
-            # Display logo beside the text
+            # Display chatbot logo beside the text
             st.markdown(f"""
             <div class="message-container">
                 <div class="bot-message">
                     <div class="logo-container">
-                        <img src="data:image/jpg;base64,{st.session_state.get('bot_logo_base64', '')}" class="logo-image" alt="Logo">
+                        <img src="data:image/png;base64,{st.session_state.get('chatbot_logo_base64', '')}" class="logo-image" alt="Chatbot Logo">
                     </div>
                     <div class="message-content">
                         {message['content']}
