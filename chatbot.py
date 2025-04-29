@@ -12,7 +12,7 @@ import base64
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 
 
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")
 
 st.markdown("""
 <style>
