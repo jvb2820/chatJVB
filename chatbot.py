@@ -64,8 +64,8 @@ st.markdown("""
         align-items: center;
     }
     .header-logo img {
-        width: 30px;
-        height: 30px;
+        width: 50px;
+        height: 50px;
         margin-right: 10px;
     }
 </style>
