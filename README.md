@@ -1,10 +1,10 @@
-#chatJVB
+chatJVB
 AI Chatbot with PDF Content-based Question Answering
 
-##📌 Project Overview
+📌 Project Overview
 chatJVB is a chatbot application that enables users to interact with an AI assistant. The app supports general conversation as well as content-based questions about uploaded PDF documents. The AI processes the PDF, extracts its text, and provides answers based on the document. Users can also engage with the bot for general queries, providing an intuitive AI interaction experience.
 
-##🛠 Technologies Used
+🛠 Technologies Used
 Programming Language: Python
 
 Libraries & Frameworks:
