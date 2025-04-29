@@ -19,7 +19,7 @@ USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")  # Use
 st.markdown("""
 <style>
     .user-message {
-        background-color: #696969;
+        background-color: #123C5A;
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
@@ -28,7 +28,8 @@ st.markdown("""
 
     }
     .bot-message {
-        background-color: #0000FF;
+        background-color: #0A1D37;
+        padding: 10px;;
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
