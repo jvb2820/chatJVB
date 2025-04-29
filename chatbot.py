@@ -173,7 +173,7 @@ with chat_container:
                         <img src="data:image/svg+xml;base64,{st.session_state.get('user_logo_base64', '')}" class="logo-image" alt="User">
                     </div>
                     <div class="message-content">
-                        <strong style="font-size: 15px;">You:</strong> {message['content']}
+                         {message['content']}
                     </div>
                 </div>
             </div>
