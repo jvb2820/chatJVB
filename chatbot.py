@@ -11,8 +11,9 @@ import base64
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 
-
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")
+# Logo paths
+BOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")
+USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")
 
 st.markdown("""
 <style>
@@ -21,6 +22,8 @@ st.markdown("""
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
+        display: flex;
+        align-items: flex-start;
     }
     .bot-message {
         background-color: #0000FF;
@@ -138,16 +141,26 @@ if submit_button and user_question:
     # Force a rerun to update the display immediately and clear the input
     st.rerun()
 
-# Load the logo image (only once with better error handling)
-if "logo_base64" not in st.session_state:
+# Load both logo images (only once with better error handling)
+if "bot_logo_base64" not in st.session_state:
     try:
-        with open(LOGO_PATH, "rb") as f:
-            logo_bytes = f.read()
-            st.session_state.logo_base64 = base64.b64encode(logo_bytes).decode()
+        with open(BOT_LOGO_PATH, "rb") as f:
+            bot_logo_bytes = f.read()
+            st.session_state.bot_logo_base64 = base64.b64encode(bot_logo_bytes).decode()
     except Exception as e:
-        st.sidebar.warning(f"Could not load logo: {e}")
+        st.sidebar.warning(f"Could not load bot logo: {e}")
         # Set a fallback empty string for the logo
-        st.session_state.logo_base64 = ""
+        st.session_state.bot_logo_base64 = ""
+
+if "user_logo_base64" not in st.session_state:
+    try:
+        with open(USER_LOGO_PATH, "rb") as f:
+            user_logo_bytes = f.read()
+            st.session_state.user_logo_base64 = base64.b64encode(user_logo_bytes).decode()
+    except Exception as e:
+        st.sidebar.warning(f"Could not load user logo: {e}")
+        # Set a fallback empty string for the logo
+        st.session_state.user_logo_base64 = ""
 
 # Display conversation history with custom styling
 with chat_container:
@@ -156,7 +169,12 @@ with chat_container:
             st.markdown(f"""
             <div class="message-container">
                 <div class="user-message">
-                    <strong style="font-size: 15px;">You:</strong> {message['content']}
+                    <div class="logo-container">
+                        <img src="data:image/svg+xml;base64,{st.session_state.get('user_logo_base64', '')}" class="logo-image" alt="User">
+                    </div>
+                    <div class="message-content">
+                        <strong style="font-size: 15px;">You:</strong> {message['content']}
+                    </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -166,7 +184,7 @@ with chat_container:
             <div class="message-container">
                 <div class="bot-message">
                     <div class="logo-container">
-                        <img src="data:image/png;base64,{st.session_state.get('logo_base64', '')}" class="logo-image" alt="Logo">
+                        <img src="data:image/jpg;base64,{st.session_state.get('bot_logo_base64', '')}" class="logo-image" alt="Logo">
                     </div>
                     <div class="message-content">
                         {message['content']}

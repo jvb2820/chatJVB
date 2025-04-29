@@ -1,0 +1,14 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#006400" />
+  
+  <!-- Inner accent ring -->
+  <circle cx="50" cy="50" r="40" fill="#007500" stroke="#00A000" stroke-width="1" />
+  
+  <!-- Stylized user icon -->
+  <circle cx="50" cy="40" r="15" fill="#FFFFFF" />
+  <path d="M25,75 C25,60 75,60 75,75 C75,85 25,85 25,75 Z" fill="#FFFFFF" />
+  
+  <!-- YOU text -->
+  <text x="50" y="105" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFFFFF">YOU</text>
+</svg>
