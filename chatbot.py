@@ -21,6 +21,7 @@ CHATBOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")  # Chatb
 USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")  # User logo
 
 # Pre-defined responses for specific questions
+# Pre-defined responses for specific questions
 PRE_DEFINED_RESPONSES = {
     "who is jvb": "JVB is Jeuz Vinci Bas, my creator. He is a talented programmer and software developer. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/. He specializes in AI applications and software development.",
     
@@ -30,10 +31,23 @@ PRE_DEFINED_RESPONSES = {
     
     "jvb": "JVB refers to Jeuz Vinci Bas, my creator and a software developer. He built this chatbot as part of his work in AI development. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/ if you'd like to learn more about his projects.",
     
-    "who created you": "I was created by Jeuz Vinci Bas (JVB), a programmer and AI developer. This chatbot is one of his projects combining AI conversation capabilities with practical tools like PDF conversion."
+    "who created you": "I was created by Jeuz Vinci Bas (JVB), a programmer and AI developer. This chatbot is one of his projects combining AI conversation capabilities with practical tools like PDF conversion.",
+    
+    # New entries for variations of the name
+    "who is jeuz": "Jeuz Vinci Bas is my creator. He is a talented programmer and software developer with expertise in AI applications. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.",
+    
+    "who is jeuz vinci bas": "Jeuz Vinci Bas is my creator and developer. He specializes in AI applications and software development, including this chatbot. You can learn more about his work or connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.",
+    
+    "tell me about jeuz": "Jeuz Vinci Bas is the developer who created me. He works on various software projects with a focus on AI applications. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/ to learn more about his work.",
+    
+    "tell me about jeuz vinci bas": "Jeuz Vinci Bas is a programmer and AI developer who created this chatbot. He combines AI conversation capabilities with practical tools like PDF conversion in his projects. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.",
+    
+    "jeuz": "Jeuz refers to Jeuz Vinci Bas, my creator and a software developer. He built this chatbot as part of his work in AI development. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.",
+    
+    "jeuz vinci bas": "Jeuz Vinci Bas is my creator and a talented software developer specializing in AI applications. This chatbot is one of his projects. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/."
 }
 
-# Function to check for pre-defined responses
+# Function to check for pre-defined responses with improved matching
 def get_predefined_response(question):
     # Convert question to lowercase for case-insensitive matching
     question_lower = question.lower().strip()
@@ -42,14 +56,31 @@ def get_predefined_response(question):
     if question_lower in PRE_DEFINED_RESPONSES:
         return PRE_DEFINED_RESPONSES[question_lower]
     
+    # Create a normalized version of the question (remove punctuation)
+    normalized_question = re.sub(r'[^\w\s]', '', question_lower)
+    normalized_question_words = set(normalized_question.split())
+    
+    # Check for 'jeuz' variations explicitly
+    if ('who' in normalized_question_words and 'jeuz' in normalized_question_words) or \
+       ('tell' in normalized_question_words and 'about' in normalized_question_words and 'jeuz' in normalized_question_words) or \
+       ('jeuz' in normalized_question_words and len(normalized_question_words) <= 3):
+        return PRE_DEFINED_RESPONSES.get("who is jeuz", 
+               "Jeuz Vinci Bas is my creator. He is a talented programmer and software developer with expertise in AI applications. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.")
+    
+    # Check for 'jvb' variations similarly
+    if ('who' in normalized_question_words and 'jvb' in normalized_question_words) or \
+       ('tell' in normalized_question_words and 'about' in normalized_question_words and 'jvb' in normalized_question_words) or \
+       ('jvb' in normalized_question_words and len(normalized_question_words) <= 3):
+        return PRE_DEFINED_RESPONSES.get("who is jvb",
+               "JVB is Jeuz Vinci Bas, my creator. He is a talented programmer and software developer. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/. He specializes in AI applications and software development.")
+    
     # Check if any key is contained within the question
     for key, response in PRE_DEFINED_RESPONSES.items():
-        # For "who is jvb" type questions, check if all words in the key appear in the question
+        # For specific question patterns, check if all words in the key appear in the question
         key_words = set(key.split())
-        question_words = set(question_lower.split())
         
-        # If all key words are in the question and it contains 'jvb'
-        if key_words.issubset(question_words) and 'jvb' in question_words:
+        # If all key words are in the question
+        if key_words.issubset(normalized_question_words):
             return response
             
     # No match found
