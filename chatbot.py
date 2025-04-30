@@ -11,6 +11,7 @@ import io
 from PIL import Image
 import fitz  # PyMuPDF for PDF to image conversion
 import docx  # python-docx for PDF to Word conversion
+import re
 
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
@@ -18,6 +19,41 @@ COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 # Set logo paths (adjust as needed)
 CHATBOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")  # Chatbot logo
 USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")  # User logo
+
+# Pre-defined responses for specific questions
+PRE_DEFINED_RESPONSES = {
+    "who is jvb": "JVB is Jeuz Vinci Bas, my creator. He is a talented programmer and software developer. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/. He specializes in AI applications and software development.",
+    
+    "what is jvb": "JVB stands for Jeuz Vinci Bas, the developer who created me. He's a programmer with expertise in AI and software development. Feel free to connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.",
+    
+    "tell me about jvb": "Jeuz Vinci Bas (JVB) is a programmer and developer who created me. He works on various software projects including AI applications like this chatbot. You can learn more about his work or connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/.",
+    
+    "jvb": "JVB refers to Jeuz Vinci Bas, my creator and a software developer. He built this chatbot as part of his work in AI development. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/ if you'd like to learn more about his projects.",
+    
+    "who created you": "I was created by Jeuz Vinci Bas (JVB), a programmer and AI developer. This chatbot is one of his projects combining AI conversation capabilities with practical tools like PDF conversion."
+}
+
+# Function to check for pre-defined responses
+def get_predefined_response(question):
+    # Convert question to lowercase for case-insensitive matching
+    question_lower = question.lower().strip()
+    
+    # Direct match check
+    if question_lower in PRE_DEFINED_RESPONSES:
+        return PRE_DEFINED_RESPONSES[question_lower]
+    
+    # Check if any key is contained within the question
+    for key, response in PRE_DEFINED_RESPONSES.items():
+        # For "who is jvb" type questions, check if all words in the key appear in the question
+        key_words = set(key.split())
+        question_words = set(question_lower.split())
+        
+        # If all key words are in the question and it contains 'jvb'
+        if key_words.issubset(question_words) and 'jvb' in question_words:
+            return response
+            
+    # No match found
+    return None
 
 # Custom CSS for styling the chat messages
 st.markdown("""
@@ -177,8 +213,15 @@ if submit_button and user_question:
     # Add user question to history
     st.session_state.conversation_history.append({"role": "user", "content": user_question})
     
-    # Generate response using Cohere (without PDF context)
-    response = llm.invoke(user_question).content
+    # Check for pre-defined responses first
+    predefined_response = get_predefined_response(user_question)
+    
+    if predefined_response:
+        # Use the pre-defined response
+        response = predefined_response
+    else:
+        # Generate response using Cohere if no pre-defined response exists
+        response = llm.invoke(user_question).content
     
     # Add response to history
     st.session_state.conversation_history.append({"role": "assistant", "content": response})
