@@ -7,6 +7,10 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain_cohere import ChatCohere
 import os
 import base64
+import io
+from PIL import Image
+import fitz  # PyMuPDF for PDF to image conversion
+import docx  # python-docx for PDF to Word conversion
 
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
@@ -65,10 +69,84 @@ if "conversation_history" not in st.session_state:
 # Create a container for chat history display
 chat_container = st.container()
 
-# Sidebar for document upload
-with st.sidebar:
-    st.title("Your Documents")
-    file = st.file_uploader("Upload a PDF file to ask questions about it", type="pdf")
+# PDF to Word conversion function
+def convert_pdf_to_word(pdf_file):
+    pdf_reader = PdfReader(pdf_file)
+    doc = docx.Document()
+    
+    for page_num in range(len(pdf_reader.pages)):
+        text = pdf_reader.pages[page_num].extract_text()
+        doc.add_paragraph(text)
+    
+    # Save to a BytesIO object
+    docx_bytes = io.BytesIO()
+    doc.save(docx_bytes)
+    docx_bytes.seek(0)
+    
+    return docx_bytes
+
+# PDF to Image conversion function
+def convert_pdf_to_images(pdf_file):
+    pdf_bytes = pdf_file.read()
+    pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+    images = []
+    
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2x zoom for better quality
+        img_bytes = pix.pil_tobytes(format="JPEG")
+        img = Image.open(io.BytesIO(img_bytes))
+        images.append(img)
+    
+    return images
+
+# Sidebar for PDF conversion tools
+with st.sidebar: 
+    st.title("🔄 PDF Converter")
+    
+    pdf_file = st.file_uploader("Upload a PDF file to convert", type="pdf")
+    
+    if pdf_file is not None:
+        # Conversion options
+        conversion_type = st.radio(
+            "Choose conversion type:",
+            ("PDF to Word", "PDF to Images")
+        )
+        
+        if st.button("Convert"):
+            with st.spinner("Converting PDF..."):
+                if conversion_type == "PDF to Word":
+                    docx_bytes = convert_pdf_to_word(pdf_file)
+                    st.download_button(
+                        label="Download Word Document",
+                        data=docx_bytes,
+                        file_name=f"{pdf_file.name.split('.pdf')[0]}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                    st.success("Conversion complete! Click the download button above.")
+                
+                elif conversion_type == "PDF to Images":
+                    images = convert_pdf_to_images(pdf_file)
+                    st.success(f"Converted {len(images)} pages to images.")
+                    
+                    # Display and provide download for each image
+                    for i, img in enumerate(images):
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.image(img, caption=f"Page {i+1}", use_column_width=True)
+                        
+                        with col2:
+                            # Convert image to bytes for download
+                            img_byte_arr = io.BytesIO()
+                            img.save(img_byte_arr, format='PNG')
+                            img_byte_arr.seek(0)
+                            
+                            st.download_button(
+                                label="Download",
+                                data=img_byte_arr,
+                                file_name=f"page_{i+1}.png",
+                                mime="image/png"
+                            )
     
     # Add clear chat button in sidebar
     if st.button("Clear Chat History"):
@@ -78,37 +156,8 @@ with st.sidebar:
     # Add information about functionality
     st.markdown("---")
     st.write("**How to use:**")
-    st.write("1. Chat directly without a document")
-    st.write("2. Or upload a PDF to ask questions about it")
-
-# Process the file if uploaded
-pdf_text = ""
-vector_store = None
-
-if file is not None:
-    with st.spinner("Processing PDF..."):
-        pdf_reader = PdfReader(file)
-        for page in pdf_reader.pages:
-            pdf_text += page.extract_text()
-
-        # Break it into chunks
-        text_splitter = RecursiveCharacterTextSplitter(
-            separators="\n",
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len
-        )
-        chunks = text_splitter.split_text(pdf_text)
-
-        # Generating embeddings with Cohere
-        embeddings = CohereEmbeddings(
-            cohere_api_key=COHERE_API_KEY,
-            model="embed-english-v3.0",
-            user_agent="langchain"
-        )
-        
-        # Creating vector store - FAISS
-        vector_store = FAISS.from_texts(chunks, embeddings)
+    st.write("1. Chat with the assistant anytime")
+    st.write("2. Convert PDFs to Word documents or images")
 
 # Define the LLM using Cohere
 llm = ChatCohere(
@@ -128,15 +177,8 @@ if submit_button and user_question:
     # Add user question to history
     st.session_state.conversation_history.append({"role": "user", "content": user_question})
     
-    # Generate response based on whether a PDF is loaded
-    if vector_store:
-        # PDF-based Q&A
-        match = vector_store.similarity_search(user_question)
-        chain = load_qa_chain(llm, chain_type="stuff")
-        response = chain.run(input_documents=match, question=user_question)
-    else:
-        # General chat without PDF context
-        response = llm.invoke(user_question).content
+    # Generate response using Cohere (without PDF context)
+    response = llm.invoke(user_question).content
     
     # Add response to history
     st.session_state.conversation_history.append({"role": "assistant", "content": response})
