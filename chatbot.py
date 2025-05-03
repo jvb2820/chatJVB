@@ -12,6 +12,8 @@ from PIL import Image
 import fitz  # PyMuPDF for PDF to image conversion
 import docx  # python-docx for PDF to Word conversion
 import re
+from pptx import Presentation  # python-pptx for PowerPoint conversion
+from pptx.util import Inches, Pt
 
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
@@ -20,7 +22,6 @@ COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
 CHATBOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")  # Chatbot logo
 USER_LOGO_PATH = os.path.join(os.path.dirname(__file__), "user_logo.svg")  # User logo
 
-# Pre-defined responses for specific questions
 # Pre-defined responses for specific questions
 PRE_DEFINED_RESPONSES = {
     "who is jvb": "JVB is Jeuz Vinci Bas, my creator. He is a talented programmer and software developer. You can connect with him on LinkedIn at https://www.linkedin.com/in/jeuz-vinci-bas-b51639341/. He specializes in AI applications and software development.",
@@ -167,6 +168,92 @@ def convert_pdf_to_images(pdf_file):
     
     return images
 
+# PDF to PowerPoint conversion function
+def convert_pdf_to_powerpoint(pdf_file):
+    # Create a new PowerPoint presentation
+    prs = Presentation()
+    
+    # Extract text and images from PDF
+    pdf_bytes = pdf_file.read()
+    pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+    
+    # For each page in the PDF
+    for page_num in range(len(pdf_document)):
+        # Add a slide
+        slide_layout = prs.slide_layouts[5]  # Using blank layout
+        slide = prs.slides.add_slide(slide_layout)
+        
+        # Get page content
+        page = pdf_document.load_page(page_num)
+        text = page.get_text()
+        
+        # Add a title to the slide (using first line as title or page number)
+        title_text = text.split('\n', 1)[0] if text else f"Slide {page_num + 1}"
+        if slide.shapes.title:
+            slide.shapes.title.text = title_text
+        
+        # Add text content to the slide
+        left = Inches(1)
+        top = Inches(1.5)
+        width = Inches(8)
+        height = Inches(5)
+        
+        txBox = slide.shapes.add_textbox(left, top, width, height)
+        tf = txBox.text_frame
+        
+        # Add main content (skip first line as it's used for title)
+        content = text.split('\n', 1)[1] if '\n' in text else ""
+        p = tf.add_paragraph()
+        p.text = content
+        p.font.size = Pt(12)
+        
+        # Alternative image extraction method using pixmap
+        try:
+            # Render the page to an image
+            pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))  # Use a good resolution
+            img_bytes = pix.tobytes("png")  # Convert to PNG format
+            
+            # Save image to a BytesIO object for adding to slide
+            image_stream = io.BytesIO(img_bytes)
+            image_stream.seek(0)
+            
+            # Add as background image to maintain layout
+            slide_width = prs.slide_width
+            slide_height = prs.slide_height
+            
+            # Add the page image as a full slide background
+            slide.shapes.add_picture(image_stream, 0, 0, width=slide_width, height=slide_height)
+            
+            # If we added the image as background, add a semi-transparent overlay for text
+            # to ensure text is visible over the image
+            left = 0
+            top = 0
+            width = slide_width
+            height = slide_height
+            
+            # Add a semi-transparent white shape behind text for readability
+            shape = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE, left, top, width, height
+            )
+            shape.fill.solid()
+            shape.fill.fore_color.rgb = RGBColor(255, 255, 255)
+            shape.fill.transparency = 0.7  # 70% transparent
+            shape.line.color.rgb = RGBColor(255, 255, 255)
+            shape.line.transparency = 1.0  # Fully transparent border
+            
+            # Send the background shape to back
+            shape.z_order = 0
+            
+        except Exception as e:
+            print(f"Error rendering page {page_num + 1} as image: {e}")
+    
+    # Save presentation to BytesIO object
+    pptx_bytes = io.BytesIO()
+    prs.save(pptx_bytes)
+    pptx_bytes.seek(0)
+    
+    return pptx_bytes
+
 # Sidebar for PDF conversion tools
 with st.sidebar: 
     st.title("🔄 PDF Converter")
@@ -177,7 +264,7 @@ with st.sidebar:
         # Conversion options
         conversion_type = st.radio(
             "Choose conversion type:",
-            ("PDF to Word", "PDF to Images")
+            ("PDF to Word", "PDF to PowerPoint", "PDF to Images")
         )
         
         if st.button("Convert"):
@@ -192,6 +279,16 @@ with st.sidebar:
                     )
                     st.success("Conversion complete! Click the download button above.")
                 
+                elif conversion_type == "PDF to PowerPoint":
+                    pptx_bytes = convert_pdf_to_powerpoint(pdf_file)
+                    st.download_button(
+                        label="Download PowerPoint Presentation",
+                        data=pptx_bytes,
+                        file_name=f"{pdf_file.name.split('.pdf')[0]}.pptx",
+                        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                    )
+                    st.success("Conversion complete! Click the download button above.")
+                
                 elif conversion_type == "PDF to Images":
                     images = convert_pdf_to_images(pdf_file)
                     st.success(f"Converted {len(images)} pages to images.")
@@ -200,7 +297,8 @@ with st.sidebar:
                     for i, img in enumerate(images):
                         col1, col2 = st.columns([3, 1])
                         with col1:
-                            st.image(img, caption=f"Page {i+1}", use_column_width=True)
+                            # FIXED: Changed use_column_width to use_container_width
+                            st.image(img, caption=f"Page {i+1}", use_container_width=True)
                         
                         with col2:
                             # Convert image to bytes for download
@@ -224,7 +322,7 @@ with st.sidebar:
     st.markdown("---")
     st.write("**How to use:**")
     st.write("1. Chat with the assistant anytime")
-    st.write("2. Convert PDFs to Word documents or images")
+    st.write("2. Convert PDFs to Word documents, PowerPoint presentations, or images")
 
 # Define the LLM using Cohere
 llm = ChatCohere(
