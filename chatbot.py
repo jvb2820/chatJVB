@@ -14,6 +14,8 @@ import docx  # python-docx for PDF to Word conversion
 import re
 from pptx import Presentation  # python-pptx for PowerPoint conversion
 from pptx.util import Inches, Pt
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.dml.color import RGBColor
 
 # Cohere API Key
 COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
@@ -101,7 +103,6 @@ st.markdown("""
     }
     .bot-message {
         background-color: #0A1D37;
-        padding: 10px;;
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
@@ -261,6 +262,11 @@ with st.sidebar:
     pdf_file = st.file_uploader("Upload a PDF file to convert", type="pdf")
     
     if pdf_file is not None:
+        # Check if a new file is uploaded to clear previous conversion results
+        if "last_uploaded_file" not in st.session_state or st.session_state.last_uploaded_file != pdf_file.name:
+            st.session_state.conversion_result = None
+            st.session_state.last_uploaded_file = pdf_file.name
+
         # Conversion options
         conversion_type = st.radio(
             "Choose conversion type:",
@@ -271,47 +277,73 @@ with st.sidebar:
             with st.spinner("Converting PDF..."):
                 if conversion_type == "PDF to Word":
                     docx_bytes = convert_pdf_to_word(pdf_file)
-                    st.download_button(
-                        label="Download Word Document",
-                        data=docx_bytes,
-                        file_name=f"{pdf_file.name.split('.pdf')[0]}.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    )
+                    st.session_state.conversion_result = {
+                        "type": "word",
+                        "data": docx_bytes,
+                        "file_name": f"{pdf_file.name.split('.pdf')[0]}.docx",
+                        "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    }
                     st.success("Conversion complete! Click the download button above.")
                 
                 elif conversion_type == "PDF to PowerPoint":
                     pptx_bytes = convert_pdf_to_powerpoint(pdf_file)
-                    st.download_button(
-                        label="Download PowerPoint Presentation",
-                        data=pptx_bytes,
-                        file_name=f"{pdf_file.name.split('.pdf')[0]}.pptx",
-                        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                    )
+                    st.session_state.conversion_result = {
+                        "type": "ppt",
+                        "data": pptx_bytes,
+                        "file_name": f"{pdf_file.name.split('.pdf')[0]}.pptx",
+                        "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                    }
                     st.success("Conversion complete! Click the download button above.")
                 
                 elif conversion_type == "PDF to Images":
                     images = convert_pdf_to_images(pdf_file)
+                    st.session_state.conversion_result = {
+                        "type": "images",
+                        "data": images
+                    }
                     st.success(f"Converted {len(images)} pages to images.")
+
+        # Display results from session state if available
+        if "conversion_result" in st.session_state and st.session_state.conversion_result:
+            result = st.session_state.conversion_result
+            
+            if result["type"] == "word":
+                st.download_button(
+                    label="Download Word Document",
+                    data=result["data"],
+                    file_name=result["file_name"],
+                    mime=result["mime"]
+                )
+            
+            elif result["type"] == "ppt":
+                st.download_button(
+                    label="Download PowerPoint Presentation",
+                    data=result["data"],
+                    file_name=result["file_name"],
+                    mime=result["mime"]
+                )
+            
+            elif result["type"] == "images":
+                images = result["data"]
+                # Display and provide download for each image
+                for i, img in enumerate(images):
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.image(img, caption=f"Page {i+1}", use_container_width=True)
                     
-                    # Display and provide download for each image
-                    for i, img in enumerate(images):
-                        col1, col2 = st.columns([3, 1])
-                        with col1:
-                            # FIXED: Changed use_column_width to use_container_width
-                            st.image(img, caption=f"Page {i+1}", use_container_width=True)
+                    with col2:
+                        # Convert image to bytes for download
+                        img_byte_arr = io.BytesIO()
+                        img.save(img_byte_arr, format='PNG')
+                        img_byte_arr.seek(0)
                         
-                        with col2:
-                            # Convert image to bytes for download
-                            img_byte_arr = io.BytesIO()
-                            img.save(img_byte_arr, format='PNG')
-                            img_byte_arr.seek(0)
-                            
-                            st.download_button(
-                                label="Download",
-                                data=img_byte_arr,
-                                file_name=f"page_{i+1}.png",
-                                mime="image/png"
-                            )
+                        st.download_button(
+                            label="Download",
+                            data=img_byte_arr,
+                            file_name=f"page_{i+1}.png",
+                            mime="image/png",
+                            key=f"download_btn_{i}"  # Unique key for each button
+                        )
     
     # Add clear chat button in sidebar
     if st.button("Clear Chat History"):
@@ -396,7 +428,7 @@ with chat_container:
             <div class="message-container">
                 <div class="bot-message">
                     <div class="logo-container">
-                        <img src="data:image/png;base64,{st.session_state.get('chatbot_logo_base64', '')}" class="logo-image" alt="Chatbot Logo">
+                        <img src="data:image/jpeg;base64,{st.session_state.get('chatbot_logo_base64', '')}" class="logo-image" alt="Chatbot Logo">
                     </div>
                     <div class="message-content">
                         {message['content']}
