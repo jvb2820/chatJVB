@@ -1,7 +1,8 @@
 streamlit
-PyPDF2
+pypdf
 langchain
 langchain_community
+langchain_text_splitters
 langchain_cohere
 cohere
 faiss-cpu
