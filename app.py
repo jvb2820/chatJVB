@@ -6,7 +6,7 @@ import re
 
 # Cohere API Key
 # Use st.secrets in production!
-COHERE_API_KEY = "aFR2rly7rpnQoOJ4Xxo1n6dAz4whPkemrnvztoA7"
+COHERE_API_KEY = "tbuA7p34kQrcl5fjwjaWpwifOJ6FIWuYSdxWSzch"
 
 # Set logo paths
 CHATBOT_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.jpg")
