@@ -1,12 +1,5 @@
 streamlit
-pypdf
 langchain
-langchain_community
-langchain_text_splitters
 langchain_cohere
 cohere
-faiss-cpu
-python-docx
-pymupdf
 pillow
-python-pptx
