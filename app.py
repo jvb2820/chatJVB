@@ -150,7 +150,7 @@ llm = ChatCohere(
     cohere_api_key=COHERE_API_KEY,
     temperature=0.3,
     max_tokens=1000,
-    model="command"
+    model="command-r7b-12-2024"
 )
 
 # User input form
